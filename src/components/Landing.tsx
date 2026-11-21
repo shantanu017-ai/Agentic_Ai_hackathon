@@ -106,11 +106,11 @@ const coverage = [
   ],
   [
     "Teacher dashboard for class-wide gaps",
-    "Demo cohort heat map, concept hot spots, at-risk list, and an agent-drafted reteach plan with a verifier report.",
+    "Demo cohort heat map, concept hot spots, at-risk list, and an agent-drafted reteach plan that is checked before you teach it.",
   ],
   [
     "Agent-planned sessions",
-    "An AI agent turns a de-identified learner snapshot into a typed plan; the verifier checks gates, budget, concepts, and bank coverage before question one.",
+    "An AI agent turns a private summary of your results into a short plan; fixed rules check gates, time, and topics before question one.",
   ],
   [
     "Agent session debrief",
@@ -285,7 +285,7 @@ export function Landing() {
         <div className="site-container relative grid items-center gap-14 py-16 lg:grid-cols-[1.06fr_0.94fr] lg:gap-10 lg:py-24">
           <div>
             <p data-hero className="eyebrow text-brick">
-              Agentic exam prep · Class 10 Physics
+              AI study coach · Class 10 Physics
             </p>
             <h1 data-hero className="display-title mt-6 max-w-[11ch] text-ink">
               Study the gaps, not the whole book.
@@ -294,11 +294,10 @@ export function Landing() {
               data-hero
               className="mt-7 max-w-xl text-[1.075rem] leading-[1.7] text-ink-soft"
             >
-              Praxis maps a Class 10 Physics syllabus concept by concept, updates
-              your mastery after every answer, and chooses the next question at the
-              edge of what you know. An AI agent turns that model into a
-              typed study plan, and a deterministic verifier checks every block
-              before you start.
+              Take a short check. Praxis shows what you understand topic by topic,
+              picks the right next question, and writes a short study plan for
+              today. An AI agent writes the plan; simple rules check it before you
+              start.
             </p>
 
             <div data-hero className="mt-9 flex flex-wrap items-center gap-3">
@@ -374,6 +373,42 @@ export function Landing() {
               Each node is a topic. The ring around it shows estimated mastery.
               Your next question is chosen from the band that ring indicates.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="border-t border-line bg-paper-deep">
+        <div className="site-container py-12 md:py-14">
+          <p className="eyebrow">How it works · 30 seconds</p>
+          <div className="mt-7 grid gap-8 md:grid-cols-3 md:gap-10">
+            {[
+              {
+                n: "01",
+                title: "Take a short check",
+                body: "Five questions, one per topic, show where you actually stand. No score to protect — just an honest starting map.",
+              },
+              {
+                n: "02",
+                title: "See what you know",
+                body: "Every answer updates a topic-by-topic map. Strong, shaky, and not-yet topics are easy to spot at a glance.",
+              },
+              {
+                n: "03",
+                title: "Get a plan, checked first",
+                body: "An AI agent suggests what to study today. Fixed rules check the time, the order, and your readiness before you start.",
+              },
+            ].map((step) => (
+              <div key={step.n} className="border-t border-line pt-5">
+                <p className="mono-meta text-brick">{step.n}</p>
+                <h3 className="mt-2 font-serif text-[1.3rem] text-ink">
+                  {step.title}
+                </h3>
+                <p className="mt-2 text-[0.95rem] leading-[1.7] text-mutedink">
+                  {step.body}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -509,7 +544,7 @@ recall   = exp(-ln2 × elapsed / interval)`}
 
               <p data-reveal className="mono-meta mt-5">
                 The mastery model runs locally on a curated bank. The agent plans
-                on top of it, and the verifier is the final gate. The model is
+                on top of it, and fixed rules are the final gate. The model is
                 real; the bank is deliberately small.
               </p>
             </div>
@@ -524,19 +559,17 @@ recall   = exp(-ln2 × elapsed / interval)`}
       >
         <div className="site-container py-20 md:py-24">
           <div data-reveal className="grid gap-6 md:grid-cols-[0.8fr_1.2fr]">
-            <p className="eyebrow text-paper/60">The agent loop</p>
+            <p className="eyebrow text-paper/60">The AI agent</p>
             <div>
               <h2 className="section-title max-w-[18ch] text-paper">
-                An agent that plans. A verifier that says no.
+                A coach that plans. Rules that check it.
               </h2>
               <p className="mt-5 max-w-2xl text-[1.025rem] leading-[1.75] text-paper/70">
-                An AI agent reads the evidence your answers produced —
-                never your name, password, or raw question text — and proposes a
-                typed study plan. Before a single question is served, a
-                deterministic verifier checks prerequisite gates, the time budget,
-                known concepts, and bank coverage. If the agent is slow or
-                unavailable, a local planner fills the same contract and the
-                interface labels which source you are seeing.
+                The AI agent looks at your results — never your name, password, or
+                the questions you saw — and suggests a short plan. Before the first
+                question, fixed rules check that it fits your time, your level, and
+                the topics you are ready for. If the AI is slow or offline, a
+                built-in planner fills in, and the page tells you which one you got.
               </p>
             </div>
           </div>
@@ -548,18 +581,18 @@ recall   = exp(-ln2 × elapsed / interval)`}
             {[
               {
                 n: "01",
-                title: "Observe",
-                body: "Fixed, auditable reads turn the learner model into a small snapshot: mastery bands, prerequisite gates, recall risk, and available items. The agent gets that snapshot, not your account.",
+                title: "Reads your results",
+                body: "Your answers become a small summary: strongest topics, weakest skills, and what is due for review. The agent sees that summary, not your account.",
               },
               {
                 n: "02",
-                title: "Plan",
-                body: "The AI agent returns strict JSON: blocks with topics, concepts, minutes, intent, and a success criterion. No browsing, no tool use, no follow-up questions — one validated response.",
+                title: "Writes a short plan",
+                body: "You get a few blocks: what to study, for how long, and how you will know it worked. This is the agent's job; it does not write or grade questions.",
               },
               {
                 n: "03",
-                title: "Verify",
-                body: "The browser rejects malformed plans, repairs what it can, and logs every check. A plan that cites an unknown concept or exceeds your budget never reaches the practice screen.",
+                title: "Checked before you start",
+                body: "Fixed rules reject or fix a plan that skips prerequisites, runs over your time, or uses topics that are not open yet. Every check is shown on screen.",
               },
             ].map((step) => (
               <article key={step.n} className="bg-ink p-7 md:p-8">
@@ -575,9 +608,9 @@ recall   = exp(-ln2 × elapsed / interval)`}
           </div>
 
           <p data-reveal className="mono-meta mt-5 max-w-3xl text-paper/50">
-            The same loop powers the session debrief and the teacher reteach plan.
-            Requests go through a same-origin site Function; the agent token never
-            reaches browser code, and session memory stays in this browser.
+            The same agent writes your end-of-session debrief and your teacher's
+            reteach plan. It only receives summaries; your answers stay in this
+            browser.
           </p>
         </div>
       </section>
@@ -836,11 +869,11 @@ recall   = exp(-ln2 × elapsed / interval)`}
                 Built on published learning science.
               </h2>
               <p className="mt-5 max-w-xl text-[1.025rem] leading-[1.75] text-ink-soft">
-                The learner model is a deterministic, inspectable approximation —
-                not a fine-tuned neural model. The planning layer is agentic: a
-                An AI agent proposes a typed plan, and a deterministic
-                verifier checks it before anything reaches the learner. Each paper
-                below informs a concrete mechanism you can open in the app.
+                The learner model is a simple, inspectable approximation, not a
+                fine-tuned neural model. The planning layer is agentic: an AI agent
+                proposes the plan, and fixed rules check it before anything reaches
+                the learner. Each paper below informs a concrete mechanism you can
+                open in the app.
               </p>
             </div>
           </div>

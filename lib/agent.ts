@@ -401,7 +401,7 @@ function studyCandidates(snapshot: LearnerSnapshot) {
   const review = snapshot.dueReviews[0];
   if (review) {
     const topic = snapshot.topics.find((entry) => entry.id === review.topicId);
-    if (topic) {
+    if (topic && !topic.gateTopicId) {
       used.add(topic.id);
       candidates.push({
         topic,
@@ -433,7 +433,9 @@ function studyCandidates(snapshot: LearnerSnapshot) {
     }
   }
 
-  const weakest = snapshot.topics.find((topic) => !used.has(topic.id));
+  const weakest = snapshot.topics.find(
+    (topic) => !used.has(topic.id) && !topic.gateTopicId,
+  );
   if (weakest) {
     used.add(weakest.id);
     candidates.push({
@@ -453,7 +455,10 @@ function studyCandidates(snapshot: LearnerSnapshot) {
   }
 
   const consolidate = snapshot.topics
-    .filter((topic) => !used.has(topic.id) && topic.mastery >= 55)
+    .filter(
+      (topic) =>
+        !used.has(topic.id) && !topic.gateTopicId && topic.mastery >= 55,
+    )
     .sort((a, b) => b.mastery - a.mastery)[0];
   if (consolidate && snapshot.minutes >= 30) {
     used.add(consolidate.id);

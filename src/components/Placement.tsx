@@ -92,9 +92,9 @@ export function Placement({ accountName, onComplete, onCancel }: Props) {
               no feedback during placement, so answer the way you would on test day.
             </p>
             <div className="mt-6 space-y-2 text-sm leading-relaxed text-mutedink">
-              <p>· One topic estimate and its knowledge components per answer</p>
+              <p>· One topic estimate and its skills per answer</p>
               <p>· Every response schedules a first review</p>
-              <p>· Concept-level gaps drive the questions afterwards</p>
+              <p>· Skill-level gaps drive the questions afterwards</p>
             </div>
             <p className="mono-meta mt-6">
               {calibration.length} questions · about 3 minutes · saved under your

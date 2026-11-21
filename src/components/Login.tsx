@@ -106,7 +106,7 @@ export function Login() {
             Your map, kept under your name.
           </h1>
           <p className="mt-6 max-w-md text-[1.025rem] leading-[1.75] text-ink-soft">
-            Sign in to resume your mastery map, due reviews and weak-concept
+            Sign in to resume your mastery map, due reviews and weak-skill
             queue. New here? A short placement builds your first map in about
             three minutes.
           </p>

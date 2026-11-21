@@ -28,7 +28,7 @@ export function SiteHeader({ theme, onToggleTheme }: Props) {
   }
   links.push(
     { label: "Model", to: section("#model"), anchor: true },
-    { label: "Agent", to: section("#agent"), anchor: true },
+    { label: "AI coach", to: section("#agent"), anchor: true },
     { label: "Research", to: section("#research"), anchor: true },
   );
   if (!user) {

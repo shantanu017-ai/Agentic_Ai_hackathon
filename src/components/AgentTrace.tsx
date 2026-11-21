@@ -22,10 +22,10 @@ export function AgentBadge({
   tone?: "light" | "ink";
 }) {
   const label = busy
-    ? "Agent planning"
+    ? "Writing your plan"
     : source === "agent"
       ? "Live AI agent"
-      : "Local verified planner";
+      : "Built-in planner (checked)";
   const classes =
     tone === "ink"
       ? busy
@@ -85,7 +85,7 @@ export function AgentTrace({
           ink ? "text-paper/50" : "text-mutedink"
         }`}
       >
-        Observe → plan → verify
+        What the agent did
       </p>
       <ol className="mt-3 space-y-3">
         {steps.map((step) => {
@@ -187,7 +187,7 @@ export function AgentTrace({
                   ink ? "text-paper/50" : "text-mutedink"
                 }`}
               >
-                One-shot plan request · no tools · result validated before display
+                One request · checked before it is shown
               </p>
             </div>
           </li>
@@ -224,8 +224,10 @@ export function VerifierLine({
       >
         <ShieldCheck className="mr-1 inline size-3" aria-hidden="true" />
         {ok
-          ? `Verifier passed all ${checks} checks`
-          : `Verifier repaired ${repairs.length} issue${repairs.length === 1 ? "" : "s"}`}
+          ? `Rules checked this plan · ${checks} checks passed`
+          : repairs.length > 0
+            ? `Rules fixed ${repairs.length} issue${repairs.length === 1 ? "" : "s"} before showing`
+            : "Rule check flagged an issue · review before starting"}
       </summary>
       {repairs.length > 0 && (
         <ul

@@ -177,10 +177,10 @@ export function Dashboard({
             {profile.name ? `, ${profile.name}` : ""}.
           </h1>
           <p className="mt-3 max-w-2xl text-[1rem] leading-relaxed text-mutedink">
-            The model has seen {profile.attempts.length} answer
+            Praxis has seen {profile.attempts.length} answer
             {profile.attempts.length === 1 ? "" : "s"} across{" "}
-            {Object.keys(profile.kcMastery).length} knowledge components. Your
-            next question comes from the gaps below.
+            {Object.keys(profile.kcMastery).length} skills. Your next question
+            comes from the gaps below.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -572,9 +572,9 @@ export function Dashboard({
         <section className="card lg:col-span-7" aria-labelledby="kc-heading">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-6 py-4">
             <h2 id="kc-heading" className="eyebrow text-ink">
-              Weak knowledge components
+              Skills to work on
             </h2>
-            <p className="mono-meta">Mastery updated per concept</p>
+            <p className="mono-meta">Updated after every answer</p>
           </div>
           <ul className="divide-y divide-[var(--site-border)]">
             {weak.map((kc) => (

@@ -63,7 +63,7 @@ export function ReteachAgent() {
         setNotice(
           adopted.plan.verifier.ok
             ? `Live reteach draft verified in ${Math.max(1, Math.round((response.elapsedMs ?? 0) / 1000))}s.`
-            : "The draft needed repairs; the verifier reconciled it before display.",
+            : "The draft needed fixes; the rule checks reconciled it before display.",
         );
       } else {
         const fallback = withFallback(local, "agent_failed");
@@ -103,7 +103,7 @@ export function ReteachAgent() {
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-mutedink">
             Reads the class evidence, ranks shared misconceptions, and drafts a
             {plan ? ` ${plan.lessonPlan.reduce((sum, step) => sum + step.minutes, 0)}-minute` : " 20-minute"}{" "}
-            lesson. A verifier checks topics, time, and citations before you teach it.
+            lesson. Fixed rules check topics, time, and citations before you teach it.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -125,7 +125,7 @@ export function ReteachAgent() {
           <p className="min-h-5 text-xs leading-relaxed text-mutedink" aria-live="polite">
             {notice ?? (plan?.source === "agent"
               ? "Live draft shown. The seeded roster never leaves this site except as de-identified aggregates."
-              : "A local draft appears instantly; the cloud agent replaces it when its answer passes the verifier.")}
+              : "A built-in draft appears instantly; the AI agent replaces it once its answer passes the rule checks.")}
           </p>
 
           {plan ? (

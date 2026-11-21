@@ -111,7 +111,7 @@ export function SessionSummary({
           `Live debrief returned in ${Math.max(
             1,
             Math.round((response.elapsedMs ?? 0) / 1000),
-          )}s and matched the approved schema.`,
+          )}s and passed the checks.`,
         );
       } else {
         const fallback = withFallback(local, "agent_failed");
@@ -322,7 +322,7 @@ export function SessionSummary({
             <AgentTrace
               steps={reflection?.trace ?? []}
               busy={busy}
-              busyLabel="One-shot debrief request · validated against the schema"
+              busyLabel="One debrief request · checked before it is shown"
             />
             <p className="mt-3 border-t border-line pt-3 text-[11px] leading-relaxed text-mutedink">
               Only session aggregates leave this browser — no answers, names, or

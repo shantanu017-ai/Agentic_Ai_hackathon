@@ -78,7 +78,7 @@ export function StudyAgent({
         setNotice(
           adopted.plan.verifier.ok
             ? `Live plan verified in ${Math.max(1, Math.round((response.elapsedMs ?? 0) / 1000))}s.`
-            : "Live plan arrived with issues; the verifier repaired it before display.",
+            : "Live plan arrived with issues; the rule checks fixed it before display.",
         );
       } else {
         const fallback = withFallback(local, "agent_failed");
@@ -114,11 +114,11 @@ export function StudyAgent({
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-paper/15 px-6 py-4">
         <div>
           <h2 id="agent-heading" className="eyebrow text-paper/70">
-            Study agent
+            Your AI study agent
           </h2>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-paper/60">
-            The agent reads your learner model, proposes the next session, and a
-            deterministic verifier checks every block before you start.
+            It reads your recent answers, suggests what to study next, and checks
+            the plan against fixed rules before you start.
           </p>
         </div>
         <AgentBadge
@@ -199,10 +199,10 @@ export function StudyAgent({
               ) : (
                 <Target className="size-4" aria-hidden="true" />
               )}
-              {busy ? "Agent is planning…" : plan ? "Re-plan with new evidence" : "Plan next session"}
+              {busy ? "Writing your plan…" : plan ? "Make a new plan" : "Plan my next session"}
             </button>
             <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-paper/40">
-              Observe → plan → verify
+              Reads results → writes plan → checks it
             </span>
           </div>
 
@@ -327,9 +327,8 @@ export function StudyAgent({
                 No plan yet.
               </p>
               <p className="mt-2 text-sm leading-relaxed text-paper/60">
-                Pick a time budget and a goal, then let the agent plan. A local
-                verified plan appears instantly while the cloud agent works, so the
-                button never waits on the network.
+                Pick a time and an optional goal, then plan. A checked plan appears
+                instantly, and the AI agent's version replaces it when ready.
               </p>
             </div>
           )}
@@ -342,12 +341,11 @@ export function StudyAgent({
             ) : (
               <div>
                 <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-paper/50">
-                  Observe → plan → verify
+                  What the agent did
                 </p>
                 <p className="mt-3 text-xs leading-relaxed text-paper/55">
-                  Each run logs the learner-model reads, the agent's proposal, and
-                  the verifier result. The trace is built from structured steps, not
-                  hidden reasoning text.
+                  Each run shows what the agent read, what it suggested, and what
+                  the checker allowed. No hidden reasoning text.
                 </p>
               </div>
             )}
