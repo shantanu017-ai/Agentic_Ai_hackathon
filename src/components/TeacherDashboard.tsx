@@ -20,6 +20,7 @@ import {
   Users,
 } from "lucide-react";
 import { MasteryBar } from "./MasteryBar";
+import { ReteachAgent } from "./ReteachAgent";
 import { useAuth } from "../contexts/AuthContext";
 import { TRACK_BY_ID } from "@/lib/questions";
 import {
@@ -69,7 +70,6 @@ export function TeacherDashboard() {
   const rows = showAll
     ? [...STUDENTS].sort((a, b) => a.readiness - b.readiness)
     : AT_RISK;
-  const topGaps = TOPIC_GAPS.slice(0, 3);
 
   return (
     <div className="site-container py-10 md:py-14">
@@ -83,8 +83,10 @@ export function TeacherDashboard() {
           </h1>
           <p className="mt-3 max-w-2xl text-[1rem] leading-relaxed text-mutedink">
             {user?.name ?? "Teacher"} sees class-wide mastery, the concepts behind
-            repeated wrong answers, and a review queue that needs attention. This
-            roster is seeded demo data, not connected student accounts.
+            repeated wrong answers, and a review queue that needs attention. The
+            reteach agent drafts the next lesson from that evidence and verifies it
+            before you teach it. This roster is seeded demo data, not connected
+            student accounts.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -433,54 +435,7 @@ export function TeacherDashboard() {
           </ul>
         </section>
 
-        {planOpen && (
-          <motion.section
-            initial={reduce ? false : { opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: reduce ? 0 : 0.25 }}
-            className="card border-brick/30 bg-brick-tint/40 lg:col-span-12"
-            aria-labelledby="plan-heading"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-brick/20 px-6 py-4">
-              <h2 id="plan-heading" className="eyebrow text-ink">
-                Draft reteach plan · next 20 minutes
-              </h2>
-              <p className="mono-meta">
-                Built from the three lowest class-level concepts
-              </p>
-            </div>
-            <div className="grid gap-6 p-6 md:grid-cols-3">
-              {topGaps.map((gap, index) => (
-                <div key={gap.topicId}>
-                  <p className="mono-meta">0{index + 1} · {gap.name}</p>
-                  <h3 className="mt-2 font-serif text-[1.25rem] text-ink">
-                    {gap.weakestKcLabel}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-                    {index === 0
-                      ? `Open with a worked example and a non-example. ${gap.below40} learners are below 40% here.`
-                      : index === 1
-                        ? `Pair-rehearse two contrasting items. Watch for ${gap.weakestKcLabel.toLowerCase()} reasoning, not just the final answer.`
-                        : "Close with a three-item exit ticket drawn from the bank. Re-check these learners tomorrow."}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setShowAll(true)}
-                    className="link-underline mt-3 text-xs"
-                  >
-                    Inspect the gap
-                  </button>
-                </div>
-              ))}
-            </div>
-            <p className="border-t border-brick/20 px-6 py-3 text-xs leading-relaxed text-mutedink">
-              Most common shared misconception: {MISCONCEPTION_HOTSPOTS[0].label} (
-              {MISCONCEPTION_HOTSPOTS[0].count} of {CLASS_STATS.students}
-              ). This plan is generated locally from the demo roster; it is not a
-              recommendation for real students.
-            </p>
-          </motion.section>
-        )}
+        {planOpen && <ReteachAgent />}
       </div>
 
       <p className="mono-meta mt-8 max-w-3xl leading-relaxed">

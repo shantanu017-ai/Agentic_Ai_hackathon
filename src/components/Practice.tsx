@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { MasteryBar } from "./MasteryBar";
+import { useAuth } from "../contexts/AuthContext";
 import {
   DIFFICULTY_LABEL,
   QUESTION_BY_ID,
@@ -36,6 +37,11 @@ import {
   type Selection,
   type SessionDraft,
 } from "@/lib/learner";
+import {
+  loadAgentMemory,
+  saveAgentMemory,
+  type StudyPlan,
+} from "@/lib/agent";
 
 const SESSION_LENGTH = 8;
 
@@ -44,6 +50,7 @@ type Props = {
   topicId?: string;
   kcId?: string;
   reviewMode?: boolean;
+  planMode?: boolean;
   onProfileChange: (profile: LearnerProfile) => void;
   onFinish: (draft: SessionDraft, finalProfile: LearnerProfile) => void;
   onExit: () => void;
@@ -54,31 +61,56 @@ export function Practice({
   topicId,
   kcId,
   reviewMode = false,
+  planMode = false,
   onProfileChange,
   onFinish,
   onExit,
 }: Props) {
   const reduce = useReducedMotion();
+  const { user } = useAuth();
+  const scope = user?.username;
   const [dueSnapshot] = useState<string[]>(() =>
     reviewMode ? dueTopicIds(profile) : [],
   );
+  const [plan] = useState<StudyPlan | null>(() =>
+    planMode ? loadAgentMemory(scope).studyPlan : null,
+  );
+
+  const blockFor = (answered: number) => {
+    if (!plan || plan.blocks.length === 0) return undefined;
+    const total = plan.blocks.reduce((sum, block) => sum + block.minutes, 0) || 1;
+    let upto = 0;
+    for (let index = 0; index < plan.blocks.length; index += 1) {
+      upto += plan.blocks[index].minutes / total;
+      if ((answered + 0.5) / SESSION_LENGTH <= upto) {
+        return plan.blocks[index];
+      }
+    }
+    return plan.blocks[plan.blocks.length - 1];
+  };
+
   const optionsFor = (
     extra: { excludeIds?: string[]; avoidTopics?: string[] } = {},
-  ) => ({
-    topicId: topicId || undefined,
-    kcId: kcId || undefined,
-    topicIds: reviewMode ? dueSnapshot : undefined,
-    excludeIds: extra.excludeIds,
-    avoidTopics: extra.avoidTopics,
-  });
+  ) => {
+    const block = plan ? blockFor(draft.answered) : undefined;
+    return {
+      topicId: block ? block.topicId : topicId || undefined,
+      kcId: block ? undefined : kcId || undefined,
+      topicIds: reviewMode ? dueSnapshot : undefined,
+      excludeIds: extra.excludeIds,
+      avoidTopics: extra.avoidTopics,
+    };
+  };
 
   const [draft, setDraft] = useState<SessionDraft>(() => startSession(profile));
   const [liveProfile, setLiveProfile] = useState(profile);
-  const [selection, setSelection] = useState<Selection | null>(() =>
-    reviewMode && dueSnapshot.length === 0
-      ? null
-      : selectQuestion(profile, optionsFor()),
-  );
+  const [selection, setSelection] = useState<Selection | null>(() => {
+    if (reviewMode && dueSnapshot.length === 0) return null;
+    return (
+      selectQuestion(profile, optionsFor()) ??
+      (plan ? selectQuestion(profile) : null)
+    );
+  });
   const [selected, setSelected] = useState<number | null>(null);
   const [result, setResult] = useState<AnswerResult | null>(null);
   const [revealed, setRevealed] = useState(false);
@@ -101,6 +133,9 @@ export function Practice({
 
   const finish = (finalProfile: LearnerProfile) => {
     const finished = finishSession(finalProfile, draft);
+    if (plan && draft.answered >= SESSION_LENGTH) {
+      saveAgentMemory(scope, { studyPlan: null });
+    }
     onProfileChange(finished);
     onFinish(draft, finished);
   };
@@ -151,8 +186,15 @@ export function Practice({
   const evidence = topicEvidence(activeProfile, question.topicId);
   const confidence = confidenceFor(evidence);
   const health = review ? reviewHealth(review) : null;
+  const activeBlock = plan ? blockFor(draft.answered) : undefined;
+  const activeBlockIndex =
+    activeBlock && plan ? plan.blocks.indexOf(activeBlock) : -1;
 
-  const sessionLabel = reviewMode
+  const sessionLabel = plan
+    ? `Study plan · ${plan.blocks.length} block${
+        plan.blocks.length === 1 ? "" : "s"
+      }`
+    : reviewMode
     ? `Spaced review · ${dueSnapshot.length} topic${
         dueSnapshot.length === 1 ? "" : "s"
       } due`
@@ -195,13 +237,20 @@ export function Practice({
       .map((id) => QUESTION_BY_ID[id]?.topicId)
       .filter((id): id is string => Boolean(id));
 
-    const next = selectQuestion(
+    let next = selectQuestion(
       result.profile,
       optionsFor({
         excludeIds: draft.questionIds,
         avoidTopics: recentTopics,
       }),
     );
+
+    if (!next && plan) {
+      next = selectQuestion(result.profile, {
+        excludeIds: draft.questionIds,
+        avoidTopics: recentTopics,
+      });
+    }
 
     if (!next) {
       finish(result.profile);
@@ -300,6 +349,26 @@ export function Practice({
               style={{ width: `${Math.max(progress, 2)}%` }}
             />
           </div>
+
+          {plan && activeBlock && (
+            <div className="mt-5 rounded-[var(--site-radius)] border border-sage/35 bg-sage-tint/60 px-4 py-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="mono-meta text-success">
+                  {plan.source === "agent" ? "Qoder agent plan" : "Local verified plan"}{" "}
+                  · block {activeBlockIndex + 1} of {plan.blocks.length}
+                </p>
+                <p className="mono-meta">
+                  {activeBlock.minutes} min · {activeBlock.topicName}
+                </p>
+              </div>
+              <p className="mt-1.5 text-sm leading-relaxed text-ink">
+                {activeBlock.intent}
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-mutedink">
+                Done when: {activeBlock.successCriterion}
+              </p>
+            </div>
+          )}
 
           <motion.div
             key={question.id}
@@ -685,7 +754,13 @@ export function Practice({
               {[
                 [
                   "Mode",
-                  reviewMode ? "Spaced review" : kcId ? "Concept focus" : "Adaptive",
+                  plan
+                    ? "Agent study plan"
+                    : reviewMode
+                      ? "Spaced review"
+                      : kcId
+                        ? "Concept focus"
+                        : "Adaptive",
                 ],
                 ["Answered", `${draft.answered} of ${SESSION_LENGTH}`],
                 ["Correct", String(draft.correct)],

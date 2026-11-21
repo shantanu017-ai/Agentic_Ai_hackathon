@@ -54,11 +54,13 @@ function practicePath(options: {
   topicId?: string;
   kcId?: string;
   review?: boolean;
+  plan?: boolean;
 }) {
   const params = new URLSearchParams();
   if (options.topicId) params.set("topic", options.topicId);
   if (options.kcId) params.set("kc", options.kcId);
   if (options.review) params.set("review", "1");
+  if (options.plan) params.set("plan", "1");
   const query = params.toString();
   return query ? `/practice?${query}` : "/practice";
 }
@@ -77,6 +79,7 @@ export function DashboardPage() {
         navigate(practicePath({ topicId, kcId }))
       }
       onStartReview={() => navigate(practicePath({ review: true }))}
+      onStartPlan={() => navigate(practicePath({ plan: true }))}
       onReset={() => {
         resetProfile();
         navigate("/", { replace: true });
@@ -92,6 +95,7 @@ export function PracticePage() {
   const topicId = params.get("topic") ?? undefined;
   const kcId = params.get("kc") ?? undefined;
   const review = params.get("review") === "1";
+  const plan = params.get("plan") === "1";
 
   if (!profile) return null;
 
@@ -102,6 +106,7 @@ export function PracticePage() {
       topicId={topicId}
       kcId={kcId}
       reviewMode={review}
+      planMode={plan}
       onProfileChange={updateProfile}
       onFinish={(draft, finalProfile) => {
         navigate("/summary", {

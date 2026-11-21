@@ -66,6 +66,20 @@ const research = [
     ],
     use: "Informs short diagnostics and item selection by estimated ability. Praxis uses a lightweight Elo-style approximation rather than a calibrated IRT bank, and says so.",
   },
+  {
+    n: "05",
+    title: "ReAct: reasoning and acting",
+    source: "Yao et al. · ICLR 2023",
+    links: [{ label: "arXiv:2210.03629", href: "https://arxiv.org/abs/2210.03629" }],
+    use: "Interleaves reasoning with actions. Praxis records the agent's tool reads, proposal, and verifier outcome as structured steps instead of exposing hidden chain-of-thought.",
+  },
+  {
+    n: "06",
+    title: "Reflexion: verbal self-reflection",
+    source: "Shinn et al. · NeurIPS 2023",
+    links: [{ label: "arXiv:2303.11366", href: "https://arxiv.org/abs/2303.11366" }],
+    use: "Turns feedback into a short written debrief. Praxis ends each session with an agent debrief built from session deltas, capped by a strict schema and stored on this device.",
+  },
 ];
 
 const coverage = [
@@ -92,7 +106,15 @@ const coverage = [
   ],
   [
     "Teacher dashboard for class-wide gaps",
-    "Demo cohort heat map, concept hot spots, at-risk list, and a drafted reteach plan.",
+    "Demo cohort heat map, concept hot spots, at-risk list, and an agent-drafted reteach plan with a verifier report.",
+  ],
+  [
+    "Agent-planned sessions",
+    "A Qoder Cloud Agent turns a de-identified learner snapshot into a typed plan; the verifier checks gates, budget, concepts, and bank coverage before question one.",
+  ],
+  [
+    "Agent session debrief",
+    "The same loop reviews each finished session, names what moved and what to watch, and keeps the result in this browser.",
   ],
 ];
 
@@ -263,7 +285,7 @@ export function Landing() {
         <div className="site-container relative grid items-center gap-14 py-16 lg:grid-cols-[1.06fr_0.94fr] lg:gap-10 lg:py-24">
           <div>
             <p data-hero className="eyebrow text-brick">
-              Class 10 Physics · adaptive exam prep
+              Agentic exam prep · Class 10 Physics
             </p>
             <h1 data-hero className="display-title mt-6 max-w-[11ch] text-ink">
               Study the gaps, not the whole book.
@@ -274,8 +296,9 @@ export function Landing() {
             >
               Praxis maps a Class 10 Physics syllabus concept by concept, updates
               your mastery after every answer, and chooses the next question at the
-              edge of what you know. Miss one and it names the reasoning gap — then
-              schedules the recall before you forget.
+              edge of what you know. A Qoder Cloud Agent turns that model into a
+              typed study plan, and a deterministic verifier checks every block
+              before you start.
             </p>
 
             <div data-hero className="mt-9 flex flex-wrap items-center gap-3">
@@ -485,11 +508,77 @@ recall   = exp(-ln2 × elapsed / interval)`}
               </div>
 
               <p data-reveal className="mono-meta mt-5">
-                This build runs a deterministic local engine on a curated bank.
-                The model is real; the bank is deliberately small.
+                The mastery model runs locally on a curated bank. The agent plans
+                on top of it, and the verifier is the final gate. The model is
+                real; the bank is deliberately small.
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Agent loop */}
+      <section
+        id="agent"
+        className="scroll-mt-24 border-t border-line bg-ink text-paper"
+      >
+        <div className="site-container py-20 md:py-24">
+          <div data-reveal className="grid gap-6 md:grid-cols-[0.8fr_1.2fr]">
+            <p className="eyebrow text-paper/60">The agent loop</p>
+            <div>
+              <h2 className="section-title max-w-[18ch] text-paper">
+                An agent that plans. A verifier that says no.
+              </h2>
+              <p className="mt-5 max-w-2xl text-[1.025rem] leading-[1.75] text-paper/70">
+                A Qoder Cloud Agent reads the evidence your answers produced —
+                never your name, password, or raw question text — and proposes a
+                typed study plan. Before a single question is served, a
+                deterministic verifier checks prerequisite gates, the time budget,
+                known concepts, and bank coverage. If the agent is slow or
+                unavailable, a local planner fills the same contract and the
+                interface labels which source you are seeing.
+              </p>
+            </div>
+          </div>
+
+          <div
+            data-reveal
+            className="mt-12 grid gap-px overflow-hidden rounded-[var(--site-radius)] border border-paper/15 bg-paper/15 md:grid-cols-3"
+          >
+            {[
+              {
+                n: "01",
+                title: "Observe",
+                body: "Fixed, auditable reads turn the learner model into a small snapshot: mastery bands, prerequisite gates, recall risk, and available items. The agent gets that snapshot, not your account.",
+              },
+              {
+                n: "02",
+                title: "Plan",
+                body: "The Qoder Cloud Agent returns strict JSON: blocks with topics, concepts, minutes, intent, and a success criterion. No browsing, no tool use, no follow-up questions — one validated response.",
+              },
+              {
+                n: "03",
+                title: "Verify",
+                body: "The browser rejects malformed plans, repairs what it can, and logs every check. A plan that cites an unknown concept or exceeds your budget never reaches the practice screen.",
+              },
+            ].map((step) => (
+              <article key={step.n} className="bg-ink p-7 md:p-8">
+                <p className="mono-meta text-paper/50">{step.n}</p>
+                <h3 className="mt-6 font-serif text-[1.45rem] leading-snug text-paper">
+                  {step.title}
+                </h3>
+                <p className="mt-3 text-[0.95rem] leading-[1.7] text-paper/65">
+                  {step.body}
+                </p>
+              </article>
+            ))}
+          </div>
+
+          <p data-reveal className="mono-meta mt-5 max-w-3xl text-paper/50">
+            The same loop powers the session debrief and the teacher reteach plan.
+            Requests go through a same-origin site Function; the Qoder token never
+            reaches browser code, and session memory stays in this browser.
+          </p>
         </div>
       </section>
 
@@ -747,10 +836,11 @@ recall   = exp(-ln2 × elapsed / interval)`}
                 Built on published learning science.
               </h2>
               <p className="mt-5 max-w-xl text-[1.025rem] leading-[1.75] text-ink-soft">
-                This is a deterministic, inspectable approximation — not a
-                fine-tuned model or a live AI tutor. Each paper below informs a
-                concrete mechanism you can open in the app, and the table maps
-                every requirement in the brief to where it lives.
+                The learner model is a deterministic, inspectable approximation —
+                not a fine-tuned neural model. The planning layer is agentic: a
+                Qoder Cloud Agent proposes a typed plan, and a deterministic
+                verifier checks it before anything reaches the learner. Each paper
+                below informs a concrete mechanism you can open in the app.
               </p>
             </div>
           </div>
@@ -811,10 +901,13 @@ recall   = exp(-ln2 × elapsed / interval)`}
               ))}
             </div>
             <p className="mono-meta mt-5 max-w-2xl">
-              No language model is called at runtime. Items and explanations are
-              authored; the adaptive, diagnostic, and scheduling logic is real and
-              runs locally. A hosted build would swap the curated bank for
-              generated items without changing these mechanisms.
+              The agent runs at request time through a same-origin site Function;
+              the Qoder token never reaches the browser. Plans are validated
+              against a strict schema, then repaired or rejected deterministically.
+              If the agent is unavailable, the local planner fills the same
+              contract and the interface labels the source. Items and explanations
+              remain authored; the mastery, diagnostic, and scheduling logic is
+              real and runs locally.
             </p>
           </div>
         </div>

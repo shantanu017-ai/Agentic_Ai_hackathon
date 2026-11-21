@@ -1,5 +1,15 @@
-import { ArrowRight, Brain, CalendarClock, TrendingUp } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  ArrowRight,
+  Brain,
+  CalendarClock,
+  RotateCw,
+  Sparkles,
+  TrendingUp,
+} from "lucide-react";
 import { MasteryBar } from "./MasteryBar";
+import { AgentBadge, AgentTrace } from "./AgentTrace";
+import { useAuth } from "../contexts/AuthContext";
 import { TOPIC_BY_ID, TRACK_BY_ID } from "@/lib/questions";
 import {
   bandFor,
@@ -9,6 +19,32 @@ import {
   type LearnerProfile,
   type SessionDraft,
 } from "@/lib/learner";
+import {
+  adoptReflection,
+  buildLocalReflection,
+  buildReflectionContext,
+  loadAgentMemory,
+  saveAgentMemory,
+  type Reflection,
+} from "@/lib/agent";
+import { requestAgent, unavailableCopy } from "@/lib/agentClient";
+
+function withFallback(reflection: Reflection, reason: string): Reflection {
+  return {
+    ...reflection,
+    source: "local",
+    trace: [
+      ...reflection.trace,
+      {
+        id: `fallback-${reflection.createdAt}`,
+        kind: "model",
+        label: "local_fallback",
+        detail: unavailableCopy(reason),
+        status: "warn",
+      },
+    ],
+  };
+}
 
 type Props = {
   draft: SessionDraft;
@@ -23,6 +59,83 @@ export function SessionSummary({
   onPracticeAgain,
   onDashboard,
 }: Props) {
+  const { user } = useAuth();
+  const scope = user?.username;
+  const [reflection, setReflection] = useState<Reflection | null>(() => {
+    const stored = loadAgentMemory(scope).reflection;
+    if (!stored) return null;
+    return new Date(stored.createdAt).getTime() >=
+      new Date(draft.startedAt).getTime()
+      ? stored
+      : null;
+  });
+  const [busy, setBusy] = useState(false);
+  const [model, setModel] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const running = useRef(false);
+
+  const run = async () => {
+    if (running.current) return;
+    running.current = true;
+    setBusy(true);
+    setNotice(null);
+    setModel(null);
+
+    const local = buildLocalReflection(draft, profile, [
+      {
+        id: "read_session",
+        kind: "tool",
+        label: "read_session",
+        detail: `Read ${draft.answered} answers and ${
+          Object.keys(draft.deltas).length
+        } topic deltas.`,
+        status: "ok",
+      },
+    ]);
+    setReflection(local);
+    saveAgentMemory(scope, { reflection: local });
+
+    const response = await requestAgent(
+      "reflect",
+      buildReflectionContext(draft, profile),
+      35_000,
+    );
+
+    if (response.mode === "live") {
+      const adopted = adoptReflection(response.text, local.trace.slice(0, 1));
+      if (adopted.reflection) {
+        setReflection(adopted.reflection);
+        saveAgentMemory(scope, { reflection: adopted.reflection });
+        setModel(response.model ?? null);
+        setNotice(
+          `Live debrief returned in ${Math.max(
+            1,
+            Math.round((response.elapsedMs ?? 0) / 1000),
+          )}s and matched the approved schema.`,
+        );
+      } else {
+        const fallback = withFallback(local, "agent_failed");
+        setReflection(fallback);
+        saveAgentMemory(scope, { reflection: fallback });
+        setNotice(adopted.reason ?? unavailableCopy("agent_failed"));
+      }
+    } else {
+      const fallback = withFallback(local, response.reason);
+      setReflection(fallback);
+      saveAgentMemory(scope, { reflection: fallback });
+      setNotice(unavailableCopy(response.reason));
+    }
+
+    setBusy(false);
+    running.current = false;
+  };
+
+  useEffect(() => {
+    if (!reflection) void run();
+    // Run once per summary view; a stored debrief for this session is reused.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const track = TRACK_BY_ID[draft.trackId];
   const accuracy = draft.answered
     ? Math.round((draft.correct / draft.answered) * 100)
@@ -100,6 +213,124 @@ export function SessionSummary({
           ))}
         </dl>
       </div>
+
+      <section
+        className="card mt-5 border-sage/30 bg-sage-tint/35"
+        aria-labelledby="debrief-heading"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-sage/25 px-6 py-4">
+          <div className="flex items-center gap-2">
+            <Sparkles className="size-4 text-sage" aria-hidden="true" />
+            <h2 id="debrief-heading" className="eyebrow text-ink">
+              Session debrief
+            </h2>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <AgentBadge
+              source={reflection?.source ?? "local"}
+              busy={busy}
+              model={model ?? undefined}
+            />
+            <button
+              type="button"
+              onClick={() => void run()}
+              disabled={busy}
+              className="btn btn-secondary btn-sm"
+            >
+              <RotateCw
+                className={`size-3.5 ${busy ? "animate-spin" : ""}`}
+                aria-hidden="true"
+              />
+              Re-run debrief
+            </button>
+          </div>
+        </div>
+        <div className="grid gap-6 p-6 lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-start">
+          <div>
+            {reflection ? (
+              <>
+                <p className="font-serif text-[1.4rem] leading-snug text-ink">
+                  {reflection.headline}
+                </p>
+                <div className="mt-4 grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <p className="eyebrow text-ink">What worked</p>
+                    <ul className="mt-2 space-y-1.5">
+                      {reflection.wins.map((win) => (
+                        <li
+                          key={win}
+                          className="flex gap-2 text-sm leading-relaxed text-ink-soft"
+                        >
+                          <span
+                            className="mt-[0.5rem] size-1 shrink-0 rounded-full bg-sage"
+                            aria-hidden="true"
+                          />
+                          {win}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="eyebrow text-ink">What to watch</p>
+                    <ul className="mt-2 space-y-1.5">
+                      {reflection.gaps.map((gap) => (
+                        <li
+                          key={gap}
+                          className="flex gap-2 text-sm leading-relaxed text-ink-soft"
+                        >
+                          <span
+                            className="mt-[0.5rem] size-1 shrink-0 rounded-full bg-brick"
+                            aria-hidden="true"
+                          />
+                          {gap}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+                <div className="mt-4 space-y-2 border-t border-sage/25 pt-4">
+                  <p className="text-sm leading-relaxed text-ink">
+                    <span className="font-medium">Next move: </span>
+                    {reflection.nextMove}
+                  </p>
+                  <p className="text-sm leading-relaxed text-mutedink">
+                    {reflection.nextReview}
+                  </p>
+                  <p className="text-xs leading-relaxed text-mutedink">
+                    {reflection.confidenceNote}
+                  </p>
+                </div>
+                {notice && (
+                  <p className="mono-meta mt-3" aria-live="polite">
+                    {notice}
+                  </p>
+                )}
+              </>
+            ) : (
+              <div>
+                <p className="font-serif text-[1.25rem] text-ink">
+                  Debriefing this session…
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-mutedink">
+                  The local evidence reader runs first; the cloud agent refines
+                  the debrief if it is available.
+                </p>
+              </div>
+            )}
+          </div>
+          <div className="rounded-[var(--site-radius)] border border-line bg-surface p-4">
+            <AgentTrace
+              steps={reflection?.trace ?? []}
+              busy={busy}
+              busyLabel="One-shot debrief request · validated against the schema"
+            />
+            <p className="mt-3 border-t border-line pt-3 text-[11px] leading-relaxed text-mutedink">
+              Only session aggregates leave this browser — no answers, names, or
+              free text.
+            </p>
+          </div>
+        </div>
+      </section>
 
       <div className="mt-5 grid gap-5 md:grid-cols-2">
         <section className="card p-6" aria-labelledby="moved-heading">
@@ -264,7 +495,8 @@ export function SessionSummary({
       </div>
 
       <p className="mono-meta mt-6">
-        Saved to your account in this browser · no external server involved
+        Learner model saved to your account in this browser · the debrief agent
+        receives only session aggregates
       </p>
     </div>
   );

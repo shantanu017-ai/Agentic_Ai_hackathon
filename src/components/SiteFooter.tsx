@@ -17,7 +17,7 @@ export function SiteFooter() {
             you: what do you actually know?
           </p>
           <p className="mono-meta mt-5">
-            A hackathon build · local learner model
+            A hackathon build · agent planning, local learner model
           </p>
         </div>
 
@@ -65,8 +65,10 @@ export function SiteFooter() {
             <li>Topic and concept mastery update after every answer</li>
             <li>Spaced reviews scheduled from recall strength</li>
             <li>Socratic follow-ups on distractor reasoning</li>
+            <li>Qoder Cloud Agent plans sessions; a deterministic verifier gates every plan</li>
+            <li>Agent calls are same-origin and server-mediated; the token stays server-side</li>
             <li>Accounts and profiles stored in this browser only</li>
-            <li>No paid APIs, analytics, or external database</li>
+            <li>No third-party analytics or external database</li>
           </ul>
         </div>
       </div>

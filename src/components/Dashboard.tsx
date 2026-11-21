@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { MasteryBar } from "./MasteryBar";
 import { ConceptGraph } from "./ConceptGraph";
+import { StudyAgent } from "./StudyAgent";
 import { TOPIC_BY_ID, TRACK_BY_ID } from "@/lib/questions";
 import {
   bandFor,
@@ -46,6 +47,7 @@ type Props = {
   onChange: (profile: LearnerProfile) => void;
   onStartPractice: (topicId?: string, kcId?: string) => void;
   onStartReview: () => void;
+  onStartPlan: () => void;
   onReset: () => void;
 };
 
@@ -102,6 +104,7 @@ export function Dashboard({
   onChange,
   onStartPractice,
   onStartReview,
+  onStartPlan,
   onReset,
 }: Props) {
   const reduce = useReducedMotion();
@@ -203,6 +206,8 @@ export function Dashboard({
       </header>
 
       <div className="mt-9 grid gap-5 lg:grid-cols-12">
+        <StudyAgent profile={profile} onStartPlan={onStartPlan} />
+
         <motion.section
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
