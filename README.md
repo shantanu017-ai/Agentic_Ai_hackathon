@@ -1,10 +1,10 @@
 # Praxis
 
-An agentic exam-prep tutor with a learner model, built as a React SPA on Qoder Sites.
+An agentic exam-prep tutor with a learner model, built as a React SPA with a server-side AI agent.
 
 Praxis opens on Class 10 Physics, maps the syllabus as a prerequisite concept graph, and updates a topic-and-concept mastery estimate after every answer. Wrong distractors carry authored reasoning gaps, so feedback can name the misconception and ask a Socratic question before revealing the solution. Recall is scheduled with a small FSRS-inspired scheduler.
 
-On top of that model sits an agent loop: a **Qoder Cloud Agent** reads a de-identified learner snapshot and proposes a typed study plan; a **deterministic verifier** checks prerequisite gates, time budget, known topics/concepts, and bank coverage before a single question is served. The same loop powers a session debrief and a teacher reteach plan. If the cloud agent is unavailable, a local planner fills the same typed contract and the interface labels the source.
+On top of that model sits an agent loop: an **AI agent** reads a de-identified learner snapshot and proposes a typed study plan; a **deterministic verifier** checks prerequisite gates, time budget, known topics/concepts, and bank coverage before a single question is served. The same loop powers a session debrief and a teacher reteach plan. If the cloud agent is unavailable, a local planner fills the same typed contract and the interface labels the source.
 
 ## Demo accounts
 
@@ -20,7 +20,7 @@ The student account opens a seeded profile with attempts, a review queue, and we
 ## The agent loop
 
 1. **Observe** — fixed, auditable reads turn the learner model into a small snapshot: mastery bands, prerequisite gates, recall risk, due reviews, and available items. No names, passwords, or raw question text are included.
-2. **Plan** — the browser posts `{task, evidence}` to a same-origin Sites Function (`/functions/v1/app?action=plan`). The Function creates a Qoder Cloud Agent session, sends one `user.message`, and polls the event list for the final text. The agent returns strict JSON only.
+2. **Plan** — the browser posts `{task, evidence}` to a same-origin Sites Function (`/functions/v1/app?action=plan`). The Function creates an AI agent session, sends one `user.message`, and polls the event list for the final text. The agent returns strict JSON only.
 3. **Verify** — the client validates the JSON with zod, then runs a deterministic verifier:
    - every `topicId`/`kcId` exists in the current track;
    - prerequisite-gate topics are respected;
@@ -33,14 +33,14 @@ Tasks: `study` (student dashboard), `reflect` (session summary), `reteach` (teac
 
 ### Trust boundaries
 
-- `QODER_PAT` is a platform-managed Secret read only by the Edge Function (`Deno.env.get('QODER_PAT')`). It is never sent to the browser, embedded in the bundle, or returned in a response.
+- The agent token is a platform-managed Secret read only by the Function and never exposed to the browser. It is never embedded in the bundle or returned in a response.
 - The Function applies a body-size cap, a per-client rate limit, task-specific evidence validation, and a 45-second reply budget. It returns safe error codes, never raw upstream payloads or credentials.
 - The client sends only aggregates (mastery values, deltas, counts). Answers, free text, names, and passwords stay in the browser.
 - Agent output is treated as untrusted data: parsed, schema-checked, verified, and rendered as text.
 
 ### Fallback behaviour
 
-If the deployment has no QODER_PAT, is rate-limited, times out, or the model returns something invalid, the UI shows the local planner and says why. The local planner is deterministic and subject to the same verifier, so the feature is never a blank screen — and never pretends a live call happened.
+If the deployment has no agent token, is rate-limited, times out, or the model returns something invalid, the UI shows the local planner and says why. The local planner is deterministic and subject to the same verifier, so the feature is never a blank screen — and never pretends a live call happened.
 
 ## What is implemented
 
@@ -70,7 +70,7 @@ There are 84 curated items across Class 10 Physics (30), SAT Math (30), and AP P
 
 ## Deliberate deviations from the original master prompt
 
-- This is a static SPA plus one Edge Function on Qoder Sites. There is no monorepo server, Clerk, Firestore, or direct OpenAI call.
+- This is a static SPA plus one server-side AI Function. There is no monorepo server, Clerk, Firestore, or direct OpenAI call.
 - The cloud model is used for planning and reflection, not for authoring items or grading. Questions and explanations are authored; the adaptive, diagnostic, misconception, and scheduling logic is deterministic and runs locally.
 - Authentication is local PBKDF2, with demo accounts seeded on first load. It is not a production auth boundary.
 - Agent requests are one-shot JSON polling rather than streaming, because each task needs a single validated result. A streaming UI could be added without changing the contracts.
@@ -87,7 +87,7 @@ npm run preview
 npx tsc -p tsconfig.functions.json   # typecheck the Edge Function without Deno
 ```
 
-The Function is packaged from `functions/` and exposed as `/functions/v1/app`. It expects the platform-provided `QODER_PAT`; without it, the app runs in honest fallback mode.
+The Function is packaged from `functions/` and exposed as `/functions/v1/app`. It expects the platform-provided agent token; without it, the app runs in honest fallback mode.
 
 ## Structure
 
@@ -96,7 +96,7 @@ functions/
   index.ts          Deno.serve entry point
   handler.ts        auth gate, rate limit, validation, Cloud Agent session + polling
   prompt.ts         system prompt and JSON contracts per task
-  cloud-agents.mjs  Qoder Cloud Agents client (resource bootstrap, locking, requests)
+  cloud-agents.mjs  cloud AI agent client (resource bootstrap, locking, requests)
 lib/
   questions.ts      tracks, topics, items, concept helpers
   class10.ts        Class 10 Physics syllabus, KCs, misconceptions

@@ -65,7 +65,7 @@ export function SiteFooter() {
             <li>Topic and concept mastery update after every answer</li>
             <li>Spaced reviews scheduled from recall strength</li>
             <li>Socratic follow-ups on distractor reasoning</li>
-            <li>Qoder Cloud Agent plans sessions; a deterministic verifier gates every plan</li>
+            <li>An AI agent plans sessions; a deterministic verifier gates every plan</li>
             <li>Agent calls are same-origin and server-mediated; the token stays server-side</li>
             <li>Accounts and profiles stored in this browser only</li>
             <li>No third-party analytics or external database</li>

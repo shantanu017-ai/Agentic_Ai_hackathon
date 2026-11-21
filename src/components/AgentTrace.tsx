@@ -24,7 +24,7 @@ export function AgentBadge({
   const label = busy
     ? "Agent planning"
     : source === "agent"
-      ? "Live Qoder agent"
+      ? "Live AI agent"
       : "Local verified planner";
   const classes =
     tone === "ink"
@@ -70,7 +70,7 @@ export function AgentTrace({
   steps,
   busy,
   tone = "light",
-  busyLabel = "Calling Qoder Cloud Agents",
+  busyLabel = "Calling the AI agent",
 }: {
   steps: AgentStep[];
   busy?: boolean;

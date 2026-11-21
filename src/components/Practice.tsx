@@ -354,7 +354,7 @@ export function Practice({
             <div className="mt-5 rounded-[var(--site-radius)] border border-sage/35 bg-sage-tint/60 px-4 py-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="mono-meta text-success">
-                  {plan.source === "agent" ? "Qoder agent plan" : "Local verified plan"}{" "}
+                  {plan.source === "agent" ? "AI agent plan" : "Local verified plan"}{" "}
                   · block {activeBlockIndex + 1} of {plan.blocks.length}
                 </p>
                 <p className="mono-meta">

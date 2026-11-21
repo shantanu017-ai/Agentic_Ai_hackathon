@@ -110,7 +110,7 @@ const coverage = [
   ],
   [
     "Agent-planned sessions",
-    "A Qoder Cloud Agent turns a de-identified learner snapshot into a typed plan; the verifier checks gates, budget, concepts, and bank coverage before question one.",
+    "An AI agent turns a de-identified learner snapshot into a typed plan; the verifier checks gates, budget, concepts, and bank coverage before question one.",
   ],
   [
     "Agent session debrief",
@@ -296,7 +296,7 @@ export function Landing() {
             >
               Praxis maps a Class 10 Physics syllabus concept by concept, updates
               your mastery after every answer, and chooses the next question at the
-              edge of what you know. A Qoder Cloud Agent turns that model into a
+              edge of what you know. An AI agent turns that model into a
               typed study plan, and a deterministic verifier checks every block
               before you start.
             </p>
@@ -530,7 +530,7 @@ recall   = exp(-ln2 × elapsed / interval)`}
                 An agent that plans. A verifier that says no.
               </h2>
               <p className="mt-5 max-w-2xl text-[1.025rem] leading-[1.75] text-paper/70">
-                A Qoder Cloud Agent reads the evidence your answers produced —
+                An AI agent reads the evidence your answers produced —
                 never your name, password, or raw question text — and proposes a
                 typed study plan. Before a single question is served, a
                 deterministic verifier checks prerequisite gates, the time budget,
@@ -554,7 +554,7 @@ recall   = exp(-ln2 × elapsed / interval)`}
               {
                 n: "02",
                 title: "Plan",
-                body: "The Qoder Cloud Agent returns strict JSON: blocks with topics, concepts, minutes, intent, and a success criterion. No browsing, no tool use, no follow-up questions — one validated response.",
+                body: "The AI agent returns strict JSON: blocks with topics, concepts, minutes, intent, and a success criterion. No browsing, no tool use, no follow-up questions — one validated response.",
               },
               {
                 n: "03",
@@ -576,7 +576,7 @@ recall   = exp(-ln2 × elapsed / interval)`}
 
           <p data-reveal className="mono-meta mt-5 max-w-3xl text-paper/50">
             The same loop powers the session debrief and the teacher reteach plan.
-            Requests go through a same-origin site Function; the Qoder token never
+            Requests go through a same-origin site Function; the agent token never
             reaches browser code, and session memory stays in this browser.
           </p>
         </div>
@@ -838,7 +838,7 @@ recall   = exp(-ln2 × elapsed / interval)`}
               <p className="mt-5 max-w-xl text-[1.025rem] leading-[1.75] text-ink-soft">
                 The learner model is a deterministic, inspectable approximation —
                 not a fine-tuned neural model. The planning layer is agentic: a
-                Qoder Cloud Agent proposes a typed plan, and a deterministic
+                An AI agent proposes a typed plan, and a deterministic
                 verifier checks it before anything reaches the learner. Each paper
                 below informs a concrete mechanism you can open in the app.
               </p>
@@ -902,7 +902,7 @@ recall   = exp(-ln2 × elapsed / interval)`}
             </div>
             <p className="mono-meta mt-5 max-w-2xl">
               The agent runs at request time through a same-origin site Function;
-              the Qoder token never reaches the browser. Plans are validated
+              the agent token never reaches the browser. Plans are validated
               against a strict schema, then repaired or rejected deterministically.
               If the agent is unavailable, the local planner fills the same
               contract and the interface labels the source. Items and explanations
