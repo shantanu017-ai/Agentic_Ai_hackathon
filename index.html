@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Praxis is an adaptive Class 10 Physics tutor with a live topic-and-concept mastery model, misconception-aware feedback, spaced review, and a teacher class view."
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="Praxis — Adaptive exam prep with a learner model"
+    />
+    <meta
+      property="og:description"
+      content="A learner model that estimates topic and concept mastery, targets the next question at your edge, and schedules recall review. Includes a seeded teacher dashboard."
+    />
+    <meta name="twitter:card" content="summary" />
+    <meta name="theme-color" content="#f7f3ea" />
+    <title>Praxis — Adaptive exam prep with a learner model</title>
+    <link rel="icon" type="image/svg+xml" href="/mark.svg" />
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("praxis.theme");
+          var theme =
+            stored === "light" || stored === "dark"
+              ? stored
+              : window.matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light";
+          document.documentElement.dataset.theme = theme;
+        } catch (error) {
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
